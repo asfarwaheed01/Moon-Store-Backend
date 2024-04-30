@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from "express";
+import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import User from "../db/model/userModel";
 import asyncHandler from "../middleware/asyncHandler";
@@ -10,6 +11,7 @@ interface AuthenticatedRequest extends Request {
 
 const createUser = asyncHandler(async (req: Request, res: Response) => {
   const { username, email, password } = req.body;
+
   if (!username || !email || !password) {
     throw new Error("Please Fill in all the input fields");
   }
@@ -24,11 +26,23 @@ const createUser = asyncHandler(async (req: Request, res: Response) => {
   try {
     await newUser.save();
     createToken(res, newUser._id);
+    const token = jwt.sign(
+      { userId: newUser._id },
+      process.env.JWT_SECRET || "as20394sdalkshd",
+      {
+        expiresIn: "6d",
+      }
+    );
+    // res.status(201).json({
+    //   _id: newUser._id,
+    //   username: newUser.username,
+    //   email: newUser.email,
+    //   isAdmin: newUser.isAdmin,
+    //   access_token: token,
+    // });
     res.status(201).json({
-      _id: newUser._id,
-      username: newUser.username,
-      email: newUser.email,
-      isAdmin: newUser.isAdmin,
+      newUser,
+      token,
     });
   } catch (error) {
     res.status(400);
@@ -38,26 +52,41 @@ const createUser = asyncHandler(async (req: Request, res: Response) => {
 
 const loginUser = asyncHandler(async (req: Request, res: Response) => {
   const { email, password } = req.body;
-  const existingUSer = await User.findOne({ email });
-  if (existingUSer) {
+  const existingUser = await User.findOne({ email });
+
+  if (existingUser) {
     const isPasswordValid = await bcrypt.compare(
       password,
-      existingUSer.password
+      existingUser.password
     );
+
     if (isPasswordValid) {
-      createToken(res, existingUSer._id);
-      res.status(201).json({
-        _id: existingUSer._id,
-        username: existingUSer.username,
-        email: existingUSer.email,
-        isAdmin: existingUSer.isAdmin,
+      createToken(res, existingUser._id);
+      const token = jwt.sign(
+        { userId: existingUser._id },
+        process.env.JWT_SECRET || "as20394sdalkshd",
+        {
+          expiresIn: "6d",
+        }
+      );
+
+      // res.status(200).json({
+      //   _id: existingUser._id,
+      //   username: existingUser.username,
+      //   email: existingUser.email,
+      //   isAdmin: existingUser.isAdmin,
+      //   access_token: token,
+      // });
+      res.status(200).json({
+        existingUser,
+        token,
       });
+
       return;
     }
   }
-  res
-    .status(404)
-    .send({ message: "User not found. Please sign up to continue." });
+
+  res.status(404).send({ message: "User not found or invalid credentials." });
 });
 
 const logoutCurrentUser = asyncHandler(async (req: Request, res: Response) => {
