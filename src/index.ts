@@ -13,7 +13,9 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(cors());
 dotenv.config();
-const PORT: number = 8000 || process.env.PORT;
+// const PORT: number = 8000 || process.env.PORT;
+const PORT: number = Number(process.env.PORT);
+console.log(process.env.PORT);
 
 // DB Connection
 connectToDatabase();

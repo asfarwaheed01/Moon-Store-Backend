@@ -25,21 +25,14 @@ const createUser = asyncHandler(async (req: Request, res: Response) => {
 
   try {
     await newUser.save();
-    createToken(res, newUser._id);
-    const token = jwt.sign(
-      { userId: newUser._id },
-      process.env.JWT_SECRET || "as20394sdalkshd",
-      {
-        expiresIn: "6d",
-      }
-    );
-    // res.status(201).json({
-    //   _id: newUser._id,
-    //   username: newUser.username,
-    //   email: newUser.email,
-    //   isAdmin: newUser.isAdmin,
-    //   access_token: token,
-    // });
+    const token = createToken(res, newUser._id);
+    // const token = jwt.sign(
+    //   { userId: newUser._id },
+    //   process.env.JWT_SECRET || "as20394sdalkshd",
+    //   {
+    //     expiresIn: "6d",
+    //   }
+    // );
     res.status(201).json({
       newUser,
       token,
@@ -61,14 +54,15 @@ const loginUser = asyncHandler(async (req: Request, res: Response) => {
     );
 
     if (isPasswordValid) {
-      createToken(res, existingUser._id);
-      const token = jwt.sign(
-        { userId: existingUser._id },
-        process.env.JWT_SECRET || "as20394sdalkshd",
-        {
-          expiresIn: "6d",
-        }
-      );
+      // createToken(res, existingUser._id);
+      // const token = jwt.sign(
+      //   { userId: existingUser._id },
+      //   process.env.JWT_SECRET || "as20394sdalkshd",
+      //   {
+      //     expiresIn: "6d",
+      //   }
+      // );
+      const token = createToken(res, existingUser._id);
 
       // res.status(200).json({
       //   _id: existingUser._id,
