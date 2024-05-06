@@ -26,6 +26,7 @@ export const addProduct = async (req: Request, res: Response) => {
       description: req.body.description,
       image: result.secure_url,
       price: req.body.price,
+      category: req.body.category,
       cloudinary_id: result.public_id,
     });
     await product.save();
@@ -56,6 +57,7 @@ export const editProducts = async (req: Request, res: Response) => {
     description: req.body.description || product.description,
     image: response?.secure_url || product.image,
     price: req.body.price || product.price,
+    category: req.body.category || product.category,
     cloudinary_id: response?.public_id || product.cloudinary_id,
   };
   product = await Product.findByIdAndUpdate(req.params.id, data, { new: true });

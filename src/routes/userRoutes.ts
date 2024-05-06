@@ -9,6 +9,7 @@ import {
   deleteUserById,
   getUserById,
   updateUserById,
+  adminLogin,
 } from "../controllers/userController";
 import { authenticate, authorizeAdmin } from "../middleware/authmiddleware";
 const router = express.Router();
@@ -16,8 +17,8 @@ const router = express.Router();
 router
   .route("/")
   .post(createUser)
-  // .get(authenticate, authorizeAdmin, getAllUsers);
-  .get(getAllUsers);
+  .get(authenticate, authorizeAdmin, getAllUsers);
+// .get(getAllUsers);
 router.post("/auth", loginUser);
 router.post("/logout", logoutCurrentUser);
 router
@@ -31,4 +32,6 @@ router
   .delete(authenticate, authorizeAdmin, deleteUserById)
   .get(authenticate, authorizeAdmin, getUserById)
   .put(authenticate, authorizeAdmin, updateUserById);
+
+router.post("/admin/login", adminLogin);
 export default router;

@@ -5,6 +5,7 @@ interface IProduct extends Document {
   description: string;
   image: string;
   price: number;
+  category: string;
   cloudinary_id: string;
 }
 
@@ -13,6 +14,7 @@ const productSchema = new Schema<IProduct>({
   description: String,
   image: String,
   price: Number,
+  category: String,
   cloudinary_id: String,
 });
 

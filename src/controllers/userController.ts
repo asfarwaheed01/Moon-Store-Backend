@@ -168,6 +168,30 @@ const updateUserById = asyncHandler(async (req: Request, res: Response) => {
   }
 });
 
+const adminLogin = asyncHandler(async (req: Request, res: Response) => {
+  const { email, password } = req.body;
+  const existingUser = await User.findOne({ email });
+  if (existingUser && existingUser.isAdmin) {
+    const isPasswordValid = await bcrypt.compare(
+      password,
+      existingUser.password
+    );
+
+    if (isPasswordValid) {
+      const token = createToken(res, existingUser._id);
+      res.status(200).json({
+        message: "Admin login successful",
+        user: existingUser,
+        token,
+      });
+    } else {
+      res.status(401).json({ message: "Invalid email or password" });
+    }
+  } else {
+    res.status(401).json({ message: "Unauthorized: Only admins can login" });
+  }
+});
+
 export {
   createUser,
   loginUser,
@@ -178,4 +202,5 @@ export {
   deleteUserById,
   getUserById,
   updateUserById,
+  adminLogin,
 };
