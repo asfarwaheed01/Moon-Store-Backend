@@ -10,6 +10,7 @@ import {
   getUserById,
   updateUserById,
   adminLogin,
+  loginGoogle,
 } from "../controllers/userController";
 import { authenticate, authorizeAdmin } from "../middleware/authmiddleware";
 const router = express.Router();
@@ -25,6 +26,8 @@ router
   .route("/profile")
   .get(authenticate, getCurrentUserProfile)
   .put(authenticate, updateCurrentUserProfile);
+
+router.post("/google", loginGoogle);
 
 // Admin Routes
 router
