@@ -3,8 +3,6 @@ import bcrypt from "bcryptjs";
 import User from "../db/model/userModel";
 import asyncHandler from "../middleware/asyncHandler";
 import createToken from "../utils/createToken";
-import dotenv from "dotenv";
-import { OAuth2Client } from "google-auth-library";
 
 interface AuthenticatedRequest extends Request {
   user?: any;
@@ -193,20 +191,70 @@ const adminLogin = asyncHandler(async (req: Request, res: Response) => {
   }
 });
 
+// const loginGoogle = asyncHandler(async (req: Request, res: Response) => {
+//   const { email } = req.body;
+//   try {
+//     let user = await User.findOne({ email });
+
+//     if (user) {
+//       const token = createToken(res, user._id);
+//       res.status(200).json({
+//         message: "login successful",
+//         user: user,
+//         token,
+//       });
+//     }
+//     const username = email.split("@")[0];
+//     const password = Math.random().toString(36).slice(-8);
+//     user = new User({
+//       username,
+//       email,
+//       password,
+//     });
+//     await user.save();
+//     const token = createToken(res, user._id);
+//     res.status(200).json({
+//       message: "Admin login successful",
+//       user: user,
+//       token,
+//     });
+//   } catch (error) {
+//     console.error("Google login and user registration failed:", error);
+//     res.status(500).json({ message: "Server error" });
+//   }
+// });
+
 const loginGoogle = asyncHandler(async (req: Request, res: Response) => {
-  const redirectUrl = "http://localhost:3000/api/auth/callback/google";
-  const oAuthClient = new OAuth2Client(
-    process.env.OAUTH_CLIENTID,
-    process.env.OAUTH_CLIENT_SECRET,
-    redirectUrl
-  );
-  const authorizeUrl = oAuthClient.generateAuthUrl({
-    access_type: "offline",
-    scope: "https://googleapis.com/auth/userinfo.profile openid",
-    prompt: "consent",
-  });
-  // const token = createToken(res, existingUser._id);
-  res.json({ url: authorizeUrl });
+  const { email } = req.body;
+  try {
+    let user = await User.findOne({ email });
+    if (user) {
+      const token = createToken(res, user._id);
+      return res.status(200).json({
+        message: "Login successful",
+        user,
+        token,
+      });
+    } else {
+      const username = email.split("@")[0];
+      const password = Math.random().toString(36).slice(-8);
+      user = new User({
+        username,
+        email,
+        password,
+      });
+      await user.save();
+      const token = createToken(res, user._id);
+      return res.status(200).json({
+        message: "User registered and logged in successfully",
+        user,
+        token,
+      });
+    }
+  } catch (error) {
+    console.error("Google login and user registration failed:", error);
+    return res.status(500).json({ message: "Server error" });
+  }
 });
 
 export {

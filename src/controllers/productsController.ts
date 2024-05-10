@@ -82,3 +82,15 @@ export const getSingleProduct = async (req: Request, res: Response) => {
   }
   return res.status(200).json(product);
 };
+
+export const findProducts = async (req: Request, res: Response) => {
+  try {
+    const { name } = req.params;
+    const regex = new RegExp(name, "i");
+    const products = await Product.find({ name: regex });
+    res.json(products);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Product Not Found" });
+  }
+};
