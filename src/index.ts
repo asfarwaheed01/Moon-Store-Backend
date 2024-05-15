@@ -5,6 +5,8 @@ const cors = require("cors");
 import cookieParser from "cookie-parser";
 import productRoute from "./routes/ProductRoutes";
 import userRoutes from "./routes/userRoutes";
+import stripeRoutes from "./routes/StripeRoutes";
+import orderRoutes from "./routes/OrderRoutes";
 import connectToDatabase from "./db/db";
 
 const app: Application = express();
@@ -23,6 +25,8 @@ connectToDatabase();
 // Api routes
 app.use("/products", productRoute);
 app.use("/api/users", userRoutes);
+app.use("/stripe", stripeRoutes);
+app.use("/order", orderRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server is running on PORT: ${PORT}`);

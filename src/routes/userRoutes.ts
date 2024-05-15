@@ -37,4 +37,5 @@ router
   .put(authenticate, authorizeAdmin, updateUserById);
 
 router.post("/admin/login", adminLogin);
+
 export default router;
