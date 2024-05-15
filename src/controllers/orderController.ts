@@ -49,7 +49,7 @@ const saveOrder = async (req: Request, res: Response) => {
 
 const getAllOrders = async (req: Request, res: Response) => {
   try {
-    const orders = await Order.find();
+    const orders = await Order.find({});
     res.status(200).json(orders);
   } catch (error) {
     console.error("Error fetching orders:", error);
@@ -57,4 +57,17 @@ const getAllOrders = async (req: Request, res: Response) => {
   }
 };
 
-export { saveOrder, getAllOrders };
+const deleteOrder = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const deleteOrder = await Order.findByIdAndDelete(id);
+    if (!deleteOrder) {
+      res.status(404).json({ message: "Order not found" });
+    }
+    res.status(200).json({ message: "Order deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Error deleting order" });
+  }
+};
+
+export { saveOrder, getAllOrders, deleteOrder };
