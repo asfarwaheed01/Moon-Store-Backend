@@ -21,7 +21,8 @@ dotenv.config();
 const server = createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:3000",
+    // origin: "http://localhost:3000",
+    origin: "*",
     methods: ["GET", "POST"],
     credentials: true,
   },
@@ -39,11 +40,21 @@ app.use("/api/users", userRoutes);
 app.use("/stripe", stripeRoutes);
 app.use("/order", orderRoutes);
 
+const users = new Map();
 io.on("connection", (socket) => {
   console.log("a user connected");
   socket.on("message", (msg) => {
     console.log("message: " + msg);
     socket.broadcast.emit("message", msg);
+  });
+  socket.on("register", (userId) => {
+    users.set(userId, socket.id);
+  });
+  socket.on("send-message", ({ sender, receiver, message }) => {
+    const receiverSocketId = users.get(receiver);
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit("receive-message", { sender, message });
+    }
   });
   socket.on("disconnect", () => {
     console.log("user disconnected");
