@@ -51,13 +51,22 @@ io.on("connection", (socket) => {
     users.set(userId, socket.id);
   });
   socket.on("send-message", ({ sender, receiver, message }) => {
+    console.log(`Message from ${sender} to ${receiver}: ${message}`);
     const receiverSocketId = users.get(receiver);
     if (receiverSocketId) {
       io.to(receiverSocketId).emit("receive-message", { sender, message });
+    } else {
+      console.log(`Receiver ${receiver} not connected`);
     }
   });
   socket.on("disconnect", () => {
-    console.log("user disconnected");
+    console.log("user disconnected", socket.id);
+    users.forEach((value, key) => {
+      if (value === socket.id) {
+        users.delete(key);
+        console.log(`User ${key} with socket ID ${socket.id} removed`);
+      }
+    });
   });
 });
 
