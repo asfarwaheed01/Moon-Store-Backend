@@ -72,14 +72,10 @@ const deleteOrder = async (req: Request, res: Response) => {
 
 const getOrdersByUserId = async (req: Request, res: Response) => {
   const { id } = req.params;
-  console.log("User ID:", id);
-
   try {
     const orders = await Order.find({ userId: id }).select(
       "_id totalAmount status products"
     );
-    console.log("Orders:", orders);
-
     if (orders.length > 0) {
       res.status(200).json(orders);
     } else {
