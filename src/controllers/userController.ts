@@ -187,12 +187,6 @@ const adminLogin = asyncHandler(async (req: Request, res: Response) => {
       const otp = generateOTP();
       const otpEntry = new OTP({ email, otp });
       await otpEntry.save();
-      // const token = createToken(res, existingUser._id);
-      // res.status(200).json({
-      //   message: "Admin login successful",
-      //   user: existingUser,
-      //   token,
-      // });
       try {
         await sendEmail({
           to: email,
