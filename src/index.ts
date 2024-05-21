@@ -7,6 +7,7 @@ import productRoute from "./routes/ProductRoutes";
 import userRoutes from "./routes/userRoutes";
 import stripeRoutes from "./routes/StripeRoutes";
 import orderRoutes from "./routes/OrderRoutes";
+import otpRoutes from "./routes/otpRoutes";
 import connectToDatabase from "./db/db";
 import { Server } from "socket.io";
 import { createServer } from "http";
@@ -39,6 +40,7 @@ app.use("/products", productRoute);
 app.use("/api/users", userRoutes);
 app.use("/stripe", stripeRoutes);
 app.use("/order", orderRoutes);
+app.use("/admin", otpRoutes);
 
 const users = new Map();
 io.on("connection", (socket) => {

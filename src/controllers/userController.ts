@@ -3,6 +3,8 @@ import bcrypt from "bcryptjs";
 import User from "../db/model/userModel";
 import asyncHandler from "../middleware/asyncHandler";
 import createToken from "../utils/createToken";
+import OTP from "../db/model/otp";
+import { sendEmail } from "../utils/mailSender";
 
 interface AuthenticatedRequest extends Request {
   user?: any;
@@ -167,6 +169,11 @@ const updateUserById = asyncHandler(async (req: Request, res: Response) => {
   }
 });
 
+// Function to generate OTP
+const generateOTP = () => {
+  return Math.floor(1000 + Math.random() * 9000).toString();
+};
+
 const adminLogin = asyncHandler(async (req: Request, res: Response) => {
   const { email, password } = req.body;
   const existingUser = await User.findOne({ email });
@@ -177,12 +184,26 @@ const adminLogin = asyncHandler(async (req: Request, res: Response) => {
     );
 
     if (isPasswordValid) {
-      const token = createToken(res, existingUser._id);
-      res.status(200).json({
-        message: "Admin login successful",
-        user: existingUser,
-        token,
-      });
+      const otp = generateOTP();
+      const otpEntry = new OTP({ email, otp });
+      await otpEntry.save();
+      // const token = createToken(res, existingUser._id);
+      // res.status(200).json({
+      //   message: "Admin login successful",
+      //   user: existingUser,
+      //   token,
+      // });
+      try {
+        await sendEmail({
+          to: email,
+          subject: "Your OTP Code",
+          text: `Your OTP code is ${otp}`,
+        });
+        res.status(200).json({ message: "OTP sent to your email" });
+      } catch (error) {
+        console.error("Failed to send OTP email: ", error);
+        res.status(500).json({ message: "Failed to send OTP email" });
+      }
     } else {
       res.status(401).json({ message: "Invalid email or password" });
     }
@@ -190,39 +211,6 @@ const adminLogin = asyncHandler(async (req: Request, res: Response) => {
     res.status(401).json({ message: "Unauthorized: Only admins can login" });
   }
 });
-
-// const loginGoogle = asyncHandler(async (req: Request, res: Response) => {
-//   const { email } = req.body;
-//   try {
-//     let user = await User.findOne({ email });
-
-//     if (user) {
-//       const token = createToken(res, user._id);
-//       res.status(200).json({
-//         message: "login successful",
-//         user: user,
-//         token,
-//       });
-//     }
-//     const username = email.split("@")[0];
-//     const password = Math.random().toString(36).slice(-8);
-//     user = new User({
-//       username,
-//       email,
-//       password,
-//     });
-//     await user.save();
-//     const token = createToken(res, user._id);
-//     res.status(200).json({
-//       message: "Admin login successful",
-//       user: user,
-//       token,
-//     });
-//   } catch (error) {
-//     console.error("Google login and user registration failed:", error);
-//     res.status(500).json({ message: "Server error" });
-//   }
-// });
 
 const loginGoogle = asyncHandler(async (req: Request, res: Response) => {
   const { email } = req.body;
